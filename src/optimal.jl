@@ -1,8 +1,39 @@
-using JuMP, Gurobi, JLD2
+function create_dict_for_opt(model)
+    nothing
+end
 
-@load "data/raw_HHCRSP/ins10-2.jld2"
 
-# load parameters
+function find_opt()
+    find_opt("ins10-1")
+end
+
+
+function find_opt(ins_name)
+
+    # @load "data/raw_HHCRSP/ins10-1.jld2"
+
+    hello_dict = load("data/raw_HHCRSP/$ins_name.jld2")
+
+
+    e = hello_dict["e"]
+    r = hello_dict["r"]
+    num_node = hello_dict["num_node"]
+    a = hello_dict["a"]
+    DS = hello_dict["DS"]
+    d = hello_dict["d"]
+    mind = hello_dict["mind"]
+    maxd = hello_dict["maxd"]
+    xx = hello_dict["xx"]
+    l = hello_dict["l"]
+    num_serv = hello_dict["num_serv"]
+    num_vehi = hello_dict["num_vehi"]
+    yy = hello_dict["yy"]
+    p = hello_dict["p"]
+
+    # a = ones(num_vehi, num_serv)
+    # r = ones(num_node, num_serv)
+
+    # load parameters
 # num_node = 11
 # num_vehi = 3
 # num_serv = 6
@@ -262,11 +293,11 @@ end
 #     end
 # end
 
-function print_value(X)
-    for x in value.(X)
-        println(values.(x))
-    end
-end
+# function print_value(X)
+#     for x in value.(X)
+#         println(values.(x))
+#     end
+# end
 
 
 route = Dict()
@@ -307,4 +338,24 @@ for k in K
             end
         end
     end
+end
+
+    resultDict = Dict(
+        "name" => ins_name,
+        "route" => route,
+        "starttime" => starttime,
+        "num_job" => num_job,
+        "solver" => JuMP.solver_name(model),
+        "late" => late,
+        "Tmax" => value.(Tmax),
+        "solve_time" => JuMP.solve_time(model),
+        "obj_value" => JuMP.objective_value(model),
+        "relative_gap" => JuMP.relative_gap(model),
+    )
+
+    # the example to use the dictionary for the variables
+    # resultDict = Dict(k => !(value.(v) isa JuMP.Containers.DenseAxisArray) ? value.(v) : value.(v) |> Array for (k, v) in object_dictionary(model) if v isa AbstractArray{VariableRef})
+    # resultDict = Dict(k => value.(v) for (k, v) in object_dictionary(model) if v isa AbstractArray{VariableRef})
+
+    return resultDict
 end

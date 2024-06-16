@@ -1,6 +1,6 @@
 using JuMP, Gurobi, JLD2
 
-@load "data/raw_HHCRSP/ins10-1.jld2"
+@load "data/raw_HHCRSP/ins10-2.jld2"
 
 # a = ones(num_vehi, num_serv)
 # r = ones(num_node, num_serv)
@@ -224,3 +224,5 @@ for k in K
         end
     end
 end
+
+resultDict = Dict(k => value.(v) for (k, v) in object_dictionary(model))
