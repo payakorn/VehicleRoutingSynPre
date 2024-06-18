@@ -1211,6 +1211,11 @@ function dir()
 end
 
 
+function dir(p...)
+    joinpath(dir(), p...)
+end
+
+
 function save_ins_txt(ins::Ins)
     opath = joinpath(dir(), "data", "simulations", ins.name)
     mkpath(opath)

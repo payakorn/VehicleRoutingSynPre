@@ -1,6 +1,7 @@
 module VehicleRoutingSynPre
 
 using Revise, Gurobi, JuMP, JLD2, Random, Glob, Printf, Combinatorics, SMTPClient, Markdown, PrettyTables, DataFrames, CSV, Latexify, Crayons, Weave, Random, Statistics, StatsBase, YAML
+
 # Write your package code here.
 include("ParticleSwarm.jl")
 include("Solution.jl")

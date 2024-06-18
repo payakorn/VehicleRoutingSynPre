@@ -1,5 +1,16 @@
+const ins_names = [
+    "ins$i-$j" for i in [10, 25, 50, 75, 100, 200, 300] for j in 1:10
+]
+
+
 function create_dict_for_opt(model)
     nothing
+end
+
+function find_opt(ins_name...)
+    for ins in ins_name
+        find_opt(ins)
+    end
 end
 
 
@@ -8,12 +19,33 @@ function find_opt()
 end
 
 
-function find_opt(ins_name)
+function find_opt(number_of_node::Integer)
+    for ins in ("ins$number_of_node-$j" for j in 1:10)
+        @info "finding optimal solution for instance: $ins"
+        find_opt(ins)
+    end
+end
 
+
+function find_opt(ins_name; timelim=3600)
+
+    location = dir("data", "HHCRSP_opt", "$ins_name.yml")
+
+    if isfile(location)
+
+        data = YAML.load_file(location)
+
+        if data["termination_status"] != "OPTIMAL" && data["solve_time"] <= timelim
+            nothing
+        else
+            return nothing
+        end
+    end
+
+    @info "optimizing $(ins_name)"
     # @load "data/raw_HHCRSP/ins10-1.jld2"
 
     hello_dict = load("data/raw_HHCRSP/$ins_name.jld2")
-
 
     e = hello_dict["e"]
     r = hello_dict["r"]
@@ -68,7 +100,6 @@ function find_opt(ins_name)
         end
     end
 
-
     # create PRE set
     PRE = []
     PRE_node = []
@@ -88,7 +119,7 @@ function find_opt(ins_name)
 
     # model
     model = Model(Gurobi.Optimizer)
-    set_optimizer_attribute(model, "TimeLimit", 12000)
+    set_optimizer_attribute(model, "TimeLimit", timelim)
 
     # variables
     @variable(model, x[i=N, j=N, k=K; i != j], Bin)
@@ -264,98 +295,126 @@ function find_opt(ins_name)
         end
     end
 
-    # objective function
+    # objective 
     @objective(model, Min, 1 / 3 * sum(d[i, j] * x[i, j, k] for i in N for j in N for k in K if i != j) + 1 / 3 * Tmax + 1 / 3 * sum(zz[i, k, s] for i in N_c for k in K for s in S))
-
 
     # optimize
     optimize!(model)
-
-    for k in K
-        for i in N
-            for j in N
-                if i != j
-                    if value.(x[i, j, k]) == 1.0
-                        println("x($i, $j, $k)")
-                    end
-                end
-            end
-        end
-    end
-
-    # for i in N
-    #     for k in K
-    #         for s in S
-    #             if r[i, s] == 1
-    #                 println("k=$k, r[$i, $s], y: $(value.(y[i, k, s]))")
-    #             end
-    #         end
-    #     end
-    # end
-
-    # function print_value(X)
-    #     for x in value.(X)
-    #         println(values.(x))
-    #     end
-    # end
-
-
+    println(solution_summary(model; verbose=true))
     route = Dict()
     starttime = Dict()
     late = Dict()
     num_job = Dict()
-    for k in K
-        route[k] = [1]
-        starttime[k] = [0.0]
-        late[k] = [0.0]
-        num_job[k] = [0]
-
-        job = 1
-        for j in N_c
-            if abs(value.(x[1, j, k]) - 1.0) <= 1e-6
-                job = deepcopy(j)
-                push!(route[k], job)
-                push!(starttime[k], value.(t[j, k]))
-                push!(late[k], l[j] - value.(t[j, k]))
-                push!(num_job[k], sum([value.(y[job, k, s]) for s in S]))
-                break
+    if model |> has_values
+        for k in K
+            for i in N
+                for j in N
+                    if i != j
+                        if value.(x[i, j, k]) == 1.0
+                            println("x($i, $j, $k)")
+                        end
+                    end
+                end
             end
         end
 
-        iter = 1
-        while job != 1 && iter <= num_node - 1
-            iter += 1
-            for j in setdiff(N, job)
-                if abs(value.(x[job, j, k]) - 1.0) <= 1e-20
+        # for i in N
+        #     for k in K
+        #         for s in S
+        #             if r[i, s] == 1
+        #                 println("k=$k, r[$i, $s], y: $(value.(y[i, k, s]))")
+        #             end
+        #         end
+        #     end
+        # end
+
+        # function print_value(X)
+        #     for x in value.(X)
+        #         println(values.(x))
+        #     end
+        # end
+
+        for k in K
+            route[k] = [1]
+            starttime[k] = [0.0]
+            late[k] = [0.0]
+            num_job[k] = [0]
+
+            job = 1
+            for j in N_c
+                if abs(value.(x[1, j, k]) - 1.0) <= 1e-6
                     job = deepcopy(j)
                     push!(route[k], job)
                     push!(starttime[k], value.(t[j, k]))
                     push!(late[k], l[j] - value.(t[j, k]))
-                    if job != 1
-                        push!(num_job[k], sum([value.(y[job, k, s]) for s in S]))
-                    end
+                    push!(num_job[k], sum([value.(y[job, k, s]) for s in S]))
                     break
                 end
             end
-        end
-    end
 
-    resultDict = Dict(
-        "name" => ins_name,
-        "route" => route,
-        "starttime" => starttime,
-        "num_job" => num_job,
-        "solver" => JuMP.solver_name(model),
-        "late" => late,
-        "Tmax" => value.(Tmax),
-        "solve_time" => JuMP.solve_time(model),
-        "obj_value" => JuMP.objective_value(model),
-        "relative_gap" => JuMP.relative_gap(model),
-    )
+            iter = 1
+            while job != 1 && iter <= num_node - 1
+                iter += 1
+                for j in setdiff(N, job)
+                    if abs(value.(x[job, j, k]) - 1.0) <= 1e-20
+                        job = deepcopy(j)
+                        push!(route[k], job)
+                        push!(starttime[k], value.(t[j, k]))
+                        push!(late[k], l[j] - value.(t[j, k]))
+                        if job != 1
+                            push!(num_job[k], sum([value.(y[job, k, s]) for s in S]))
+                        end
+                        break
+                    end
+                end
+            end
+        end
+
+        resultDict = Dict(
+            "name" => ins_name,
+            "route" => route,
+            "starttime" => starttime,
+            "num_job" => num_job,
+            "solver" => JuMP.solver_name(model),
+            "late" => late,
+            "Tmax" => value.(Tmax),
+            "solve_time" => JuMP.solve_time(model),
+            "obj_value" => JuMP.objective_value(model),
+            "relative_gap" => JuMP.relative_gap(model),
+            "output_text" => "$(solution_summary(model))",
+            "termination_status" => termination_status(model),
+        )
+    else
+
+        resultDict = Dict(
+            "name" => ins_name,
+            "route" => route,
+            "starttime" => starttime,
+            "num_job" => num_job,
+            "solver" => JuMP.solver_name(model),
+            "late" => late,
+            "Tmax" => Inf,
+            "solve_time" => JuMP.solve_time(model),
+            "obj_value" => Inf,
+            "relative_gap" => 1,
+            "output_text" => "$(solution_summary(model))",
+            "termination_status" => termination_status(model),
+        )
+    end
 
     # the example to use the dictionary for the variables
     # resultDict = Dict(k => !(value.(v) isa JuMP.Containers.DenseAxisArray) ? value.(v) : value.(v) |> Array for (k, v) in object_dictionary(model) if v isa AbstractArray{VariableRef})
     # resultDict = Dict(k => value.(v) for (k, v) in object_dictionary(model) if v isa AbstractArray{VariableRef})
+    save_opt_solution_to_YAML(resultDict)
 
     return resultDict
+end
+
+function save_opt_solution_to_YAML(results::Dict)
+    YAML.write_file(dir("data", "HHCRSP_opt", "$( results["name"] ).yml"), results)
+end
+
+function load_opt_solution_YAML(ins_name::String)
+    location = dir("data", "HHCRSP_opt", "$ins_name.yml")
+    return YAML.load_file(location)
 end
