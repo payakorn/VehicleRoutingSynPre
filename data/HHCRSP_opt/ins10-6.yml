@@ -1,0 +1,118 @@
+relative_gap: 0.0
+starttime:
+  2:
+    - 0.0
+    - 83.0
+    - 244.0
+    - 401.0
+    - 490.0
+  3:
+    - 0.0
+    - 200.6689499999993
+    - 244.0
+    - 355.7920269999995
+    - 421.0
+  1:
+    - 0.0
+    - 28.62300999999934
+    - 138.0
+    - 220.94448999999986
+    - 276.0
+    - 321.7920269999995
+    - 401.0
+    - 491.6937940000007
+    - 569.0
+Tmax: 0.0
+name: "ins10-6"
+solver: "Gurobi"
+output_text: |
+  * Solver : Gurobi
+  
+  * Status
+    Result count       : 7
+    Termination status : OPTIMAL
+    Message from the solver:
+    "Model was solved to optimality (subject to tolerances), and an optimal solution is available."
+  
+  * Candidate solution (result #1)
+    Primal status      : FEASIBLE_POINT
+    Dual status        : NO_SOLUTION
+    Objective value    : 2.00099e+02
+    Objective bound    : 2.00099e+02
+    Relative gap       : 0.00000e+00
+    Dual objective value : 2.00099e+02
+  
+  * Work counters
+    Solve time (sec)   : 2.34551e-01
+    Barrier iterations : 0
+    Node count         : 319
+  
+route:
+  2:
+    - 1
+    - 7
+    - 9
+    - 11
+    - 1
+  3:
+    - 1
+    - 8
+    - 9
+    - 10
+    - 1
+  1:
+    - 1
+    - 6
+    - 5
+    - 4
+    - 3
+    - 10
+    - 11
+    - 2
+    - 1
+termination_status: OPTIMAL
+obj_value: 200.09915889999996
+late:
+  2:
+    - 0.0
+    - 120.0
+    - 0.0
+    - 120.0
+    - 510.0
+  3:
+    - 0.0
+    - 56.33105000000069
+    - 0.0
+    - 74.2079730000005
+    - 579.0
+  1:
+    - 0.0
+    - 92.37699000000066
+    - 0.0
+    - 45.05551000000014
+    - 0.0
+    - 108.2079730000005
+    - 120.0
+    - 79.30620599999929
+    - 431.0
+num_job:
+  2:
+    - 0
+    - 1
+    - 1
+    - 1
+  3:
+    - 0
+    - 1
+    - 1
+    - 1
+  1:
+    - 0
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+solve_time: 0.23455095291137695
