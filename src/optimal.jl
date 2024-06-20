@@ -20,14 +20,18 @@ end
 
 
 function find_opt(number_of_node::Integer)
-    for ins in ("ins$number_of_node-$j" for j in 1:10)
-        @info "finding optimal solution for instance: $ins"
-        find_opt(ins)
+    for num_node in number_of_node
+        for num_ins in 1:10
+            @info "finding optimal solution for instance: ins$num_node-$num_ins"
+            find_opt(num_node, num_ins)
+        end
     end
 end
 
 
-function find_opt(ins_name; timelim=3600)
+function find_opt(num_node, num_ins; timelim=3600, ins_type=:txt, returnModel=false)
+
+    ins_name = "ins$num_node-$num_ins"
 
     location = dir("data", "HHCRSP_opt", "$ins_name.yml")
 
@@ -38,6 +42,7 @@ function find_opt(ins_name; timelim=3600)
         if data["termination_status"] != "OPTIMAL" && data["solve_time"] <= timelim
             nothing
         else
+            @info "not run beacuse the optimal solution is found."
             return nothing
         end
     end
@@ -45,22 +50,41 @@ function find_opt(ins_name; timelim=3600)
     @info "optimizing $(ins_name)"
     # @load "data/raw_HHCRSP/ins10-1.jld2"
 
-    hello_dict = load("data/raw_HHCRSP/$ins_name.jld2")
+    if ins_type == :jld
+        hello_dict = load("data/raw_HHCRSP/$ins_name.jld2")
 
-    e = hello_dict["e"]
-    r = hello_dict["r"]
-    num_node = hello_dict["num_node"]
-    a = hello_dict["a"]
-    DS = hello_dict["DS"]
-    d = hello_dict["d"]
-    mind = hello_dict["mind"]
-    maxd = hello_dict["maxd"]
-    xx = hello_dict["xx"]
-    l = hello_dict["l"]
-    num_serv = hello_dict["num_serv"]
-    num_vehi = hello_dict["num_vehi"]
-    yy = hello_dict["yy"]
-    p = hello_dict["p"]
+        e = hello_dict["e"]
+        r = hello_dict["r"]
+        num_node = hello_dict["num_node"]
+        a = hello_dict["a"]
+        # DS = hello_dict["DS"]
+        d = hello_dict["d"]
+        mind = hello_dict["mind"]
+        maxd = hello_dict["maxd"]
+        # xx = hello_dict["xx"]
+        l = hello_dict["l"]
+        num_serv = hello_dict["num_serv"]
+        num_vehi = hello_dict["num_vehi"]
+        # yy = hello_dict["yy"]
+        p = hello_dict["p"]
+    else
+        data = load_ins_text(num_node, num_ins)
+
+        e = data.e
+        r = data.r
+        num_node = data.num_node
+        a = data.a
+        # DS = data.DS
+        d = data.d
+        mind = data.mind
+        maxd = data.maxd
+        # xx = data.xx
+        l = data.l
+        num_serv = data.num_serv
+        num_vehi = data.num_vehi
+        # yy = data.yy
+        p = data.p
+    end
 
     # a = ones(num_vehi, num_serv)
     # r = ones(num_node, num_serv)
@@ -88,7 +112,7 @@ function find_opt(ins_name; timelim=3600)
     SYN_num = ones(num_node, num_serv)
     for i in N_c
         pos = findall(x -> x == 1.0, r[i, :])
-        if mind[i] == 0 && maxd[i] == 0
+        if mind[i] == 0 && maxd[i] == 0 && length(pos) >= 2
             push!(Q, (i, length(pos) - 1))
             push!(SYN, (i, pos[1]))
             r_syn[i, pos[1]] = 2.0
@@ -118,7 +142,7 @@ function find_opt(ins_name; timelim=3600)
     # end
 
     # model
-    model = Model(Gurobi.Optimizer)
+    model = Model(Gurobi.Optimizer; add_bridges=false)
     set_optimizer_attribute(model, "TimeLimit", timelim)
 
     # variables
@@ -310,7 +334,7 @@ function find_opt(ins_name; timelim=3600)
             for i in N
                 for j in N
                     if i != j
-                        if value.(x[i, j, k]) == 1.0
+                        if value.(x[i, j, k]) <= 1e-3
                             println("x($i, $j, $k)")
                         end
                     end
@@ -328,11 +352,6 @@ function find_opt(ins_name; timelim=3600)
         #     end
         # end
 
-        # function print_value(X)
-        #     for x in value.(X)
-        #         println(values.(x))
-        #     end
-        # end
 
         for k in K
             route[k] = [1]
@@ -406,8 +425,12 @@ function find_opt(ins_name; timelim=3600)
     # resultDict = Dict(k => !(value.(v) isa JuMP.Containers.DenseAxisArray) ? value.(v) : value.(v) |> Array for (k, v) in object_dictionary(model) if v isa AbstractArray{VariableRef})
     # resultDict = Dict(k => value.(v) for (k, v) in object_dictionary(model) if v isa AbstractArray{VariableRef})
     save_opt_solution_to_YAML(resultDict)
-
-    return resultDict
+    
+    if returnModel
+        return model
+    else
+        return resultDict
+    end
 end
 
 function save_opt_solution_to_YAML(results::Dict)

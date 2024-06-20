@@ -18,7 +18,7 @@ output_text: |
     Objective bound    : 1.00000e+100
   
   * Work counters
-    Solve time (sec)   : 1.56593e-03
+    Solve time (sec)   : 3.89600e-03
     Barrier iterations : 0
     Node count         : 0
   
@@ -27,4 +27,4 @@ termination_status: INFEASIBLE_OR_UNBOUNDED
 obj_value: .inf
 late: {}
 num_job: {}
-solve_time: 0.0015659332275390625
+solve_time: 0.003895998001098633
