@@ -383,7 +383,7 @@ function find_service_request(r::Array)
     #     append!(serv_requst, [findall(x->x==1, r[node, :])])
     # end
     # return serv_requst
-    return Dict(node => findall(x->x==1, r[node, :]) for node in 2:size(r, 1))
+    return Dict(node => findall(x->x==1, r[node, :]) for node in 2:size(r, 1)-1)
 end
 
 

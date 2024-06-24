@@ -43,7 +43,7 @@ output_text: |
     Dual objective value : 2.18199e+02
   
   * Work counters
-    Solve time (sec)   : 4.68611e-01
+    Solve time (sec)   : 4.07693e-01
     Barrier iterations : 0
     Node count         : 3812
   
@@ -115,4 +115,4 @@ num_job:
     - 1
     - 1
     - 1
-solve_time: 0.4686110019683838
+solve_time: 0.40769290924072266

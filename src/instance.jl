@@ -1099,15 +1099,15 @@ function load_ins_text(num_node::Int64, num_ins::Int64; locc=nothing)
         
         # a
         a = []
-        aa = lines[(line_var[6]):(line_var[7]-2)]
-        aa = replace.(aa, "a=" => "")
-        aa = replace.(aa, "[" => "")
-        aa = replace.(aa, "]" => "")
+        @show aa = lines[(line_var[6]):(line_var[7]-2)]
+        @show aa = replace.(aa, "a=" => "")
+        @show aa = replace.(aa, "[" => "")
+        @show aa = replace.(aa, "]" => "")
         for (i, j) in enumerate(aa)
             j = String.(split(j, ","))
             push!(a, parse.(Int64, j))
         end
-        a = [a[i][j] for i in 1:num_vehi, j in 1:num_serv]
+        @show a = [a[i][j] for i in 1:num_vehi, j in 1:num_serv]
 
 
         # d

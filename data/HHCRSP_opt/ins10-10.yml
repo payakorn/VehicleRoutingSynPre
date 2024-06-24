@@ -1,30 +1,118 @@
-relative_gap: 1
-starttime: {}
-Tmax: .inf
+relative_gap: 0.0
+starttime:
+  2:
+    - 0.0
+    - 46.0
+    - 256.0
+    - 287.76305399999706
+    - 318.027391999998
+    - 574.0
+    - 634.0
+  3:
+    - 0.0
+    - 93.0
+    - 287.76305399999706
+    - 393.0
+    - 495.0
+  1:
+    - 0.0
+    - 60.0
+    - 111.40055000000024
+    - 157.0
+    - 261.0
+    - 574.0
+    - 634.0
+Tmax: 0.0
 name: "ins10-10"
 solver: "Gurobi"
 output_text: |
   * Solver : Gurobi
   
   * Status
-    Result count       : 0
-    Termination status : INFEASIBLE_OR_UNBOUNDED
+    Result count       : 9
+    Termination status : OPTIMAL
     Message from the solver:
-    "Model was proven to be either infeasible or unbounded. To obtain a more definitive conclusion, set the DualReductions parameter to 0 and reoptimize."
+    "Model was solved to optimality (subject to tolerances), and an optimal solution is available."
   
   * Candidate solution (result #1)
-    Primal status      : NO_SOLUTION
+    Primal status      : FEASIBLE_POINT
     Dual status        : NO_SOLUTION
-    Objective bound    : 1.00000e+100
+    Objective value    : 2.22564e+02
+    Objective bound    : 2.22564e+02
+    Relative gap       : 0.00000e+00
+    Dual objective value : 2.22564e+02
   
   * Work counters
-    Solve time (sec)   : 3.89600e-03
+    Solve time (sec)   : 2.60683e-01
     Barrier iterations : 0
-    Node count         : 0
+    Node count         : 591
   
-route: {}
-termination_status: INFEASIBLE_OR_UNBOUNDED
-obj_value: .inf
-late: {}
-num_job: {}
-solve_time: 0.003895998001098633
+route:
+  2:
+    - 1
+    - 6
+    - 7
+    - 9
+    - 10
+    - 11
+    - 1
+  3:
+    - 1
+    - 4
+    - 9
+    - 2
+    - 1
+  1:
+    - 1
+    - 3
+    - 5
+    - 8
+    - 10
+    - 11
+    - 1
+termination_status: OPTIMAL
+obj_value: 222.56380866666666
+late:
+  2:
+    - 0.0
+    - 120.0
+    - 120.0
+    - 40.236946000002945
+    - 62.972608000002026
+    - 0.0
+    - -34.0
+  3:
+    - 0.0
+    - 120.0
+    - 40.236946000002945
+    - 120.0
+    - 105.0
+  1:
+    - 0.0
+    - 120.0
+    - 98.59944999999976
+    - 0.0
+    - 120.0
+    - 0.0
+    - -34.0
+num_job:
+  2:
+    - 0
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+  3:
+    - 0
+    - 1
+    - 1
+    - 1
+  1:
+    - 0
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+solve_time: 0.2606830596923828
