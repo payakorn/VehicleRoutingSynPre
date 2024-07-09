@@ -14,8 +14,14 @@ end
 
 function find_opt(ins_name...)
   for ins in ins_name
-    find_opt(ins...)
+    find_opt(ins)
   end
+end
+
+
+function find_opt(ins::String)
+    x = split(ins[4:end], "-")
+    return find_opt(parse(Int64, x[1]), parse(Int64, x[2]))
 end
 
 
@@ -40,7 +46,7 @@ end
 # end
 
 
-function find_opt(num_node, num_ins; timelim=3600, ins_type=:txt, returnModel=false, save_model=true)
+function find_opt(num_node, num_ins; timelim=10800, ins_type=:txt, returnModel=false, save_model=true)
 
   ins_name = "ins$num_node-$num_ins"
 
@@ -82,7 +88,6 @@ function find_opt(num_node, num_ins; timelim=3600, ins_type=:txt, returnModel=fa
     p = hello_dict["p"]
   else
     data = load_ins_text(num_node, num_ins)
-
     e = data.e
     r = data.r
     e[1] = e[end]
