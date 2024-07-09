@@ -170,7 +170,8 @@ function find_opt(num_node, num_ins; timelim=10800, ins_type=:txt, returnModel=f
 
   # model
   # can improve the performance with JuMP (some thing bridge)
-  model = Model(Gurobi.Optimizer)
+  model = Model(HiGHS.Optimizer)
+  # model = Model(Gurobi.Optimizer)
 
   # variables
   # @variable(model, x[i=N, j=N, k=K; i != j], Bin)
@@ -431,6 +432,7 @@ function find_opt(num_node, num_ins; timelim=10800, ins_type=:txt, returnModel=f
             push!(starttime[k], value.(t[j, k]))
             push!(late[k], l[j] - value.(t[j, k]))
             if job != 1
+              @show job
               push!(num_job[k], sum([value.(y[job, k, s]) for s in S]))
             end
             break
