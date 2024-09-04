@@ -1,0 +1,58 @@
+  Activating project at `~/.julia/dev/VehicleRoutingSynPre`
+[ Info: optimizing ins25-1
+line: 1 has nbNodes=
+line: 2 has nbVehi=
+line: 3 has nbServi=
+line: 4 has r=
+line: 33 has DS=
+line: 34 has a=
+line: 40 has x=
+line: 41 has y=
+line: 42 has d=
+line: 71 has p=
+line: 234 has mind=
+line: 235 has maxd=
+line: 236 has e=
+line: 237 has l=
+aa = lines[line_var[6]:line_var[7] - 2] = ["a=[[1, 0, 0, 0, 0, 0]", "[0, 1, 1, 0, 0, 0]", "[0, 0, 0, 0, 1, 1]", "[0, 0, 0, 1, 1, 1]", "[0, 0, 0, 1, 1, 1]"]
+aa = replace.(aa, "a=" => "") = ["[[1, 0, 0, 0, 0, 0]", "[0, 1, 1, 0, 0, 0]", "[0, 0, 0, 0, 1, 1]", "[0, 0, 0, 1, 1, 1]", "[0, 0, 0, 1, 1, 1]"]
+aa = replace.(aa, "[" => "") = ["1, 0, 0, 0, 0, 0]", "0, 1, 1, 0, 0, 0]", "0, 0, 0, 0, 1, 1]", "0, 0, 0, 1, 1, 1]", "0, 0, 0, 1, 1, 1]"]
+aa = replace.(aa, "]" => "") = ["1, 0, 0, 0, 0, 0", "0, 1, 1, 0, 0, 0", "0, 0, 0, 0, 1, 1", "0, 0, 0, 1, 1, 1", "0, 0, 0, 1, 1, 1"]
+a = [(a[i])[j] for i = 1:num_vehi, j = 1:num_serv] = [1 0 0 0 0 0; 0 1 1 0 0 0; 0 0 0 0 1 1; 0 0 0 1 1 1; 0 0 0 1 1 1]
+[ Info: SYN = Any[(19, 5), (20, 5), (21, 4), (22, 5)]
+[ Info: PRE node = Any[(23, 2, 4, 7.0, 14.0), (24, 2, 6, 49.0, 98.0), (25, 1, 4, 13.0, 26.0), (26, 1, 4, 9.0, 18.0)]
+Set parameter Username
+ERROR: LoadError: Gurobi Error 10009: License is for 1 sockets, machine has 2
+Stacktrace:
+  [1] _check_ret
+    @ ~/.julia/packages/Gurobi/uP4zR/src/MOI_wrapper/MOI_wrapper.jl:401 [inlined]
+  [2] Gurobi.Env(; output_flag::Int64, memory_limit::Nothing, started::Bool)
+    @ Gurobi ~/.julia/packages/Gurobi/uP4zR/src/MOI_wrapper/MOI_wrapper.jl:128
+  [3] Env
+    @ ~/.julia/packages/Gurobi/uP4zR/src/MOI_wrapper/MOI_wrapper.jl:101 [inlined]
+  [4] Gurobi.Optimizer(env::Nothing; enable_interrupts::Bool)
+    @ Gurobi ~/.julia/packages/Gurobi/uP4zR/src/MOI_wrapper/MOI_wrapper.jl:332
+  [5] Optimizer (repeats 2 times)
+    @ ~/.julia/packages/Gurobi/uP4zR/src/MOI_wrapper/MOI_wrapper.jl:326 [inlined]
+  [6] _instantiate_and_check(optimizer_constructor::Any)
+    @ MathOptInterface ~/.julia/packages/MathOptInterface/aJZbq/src/instantiate.jl:94
+  [7] instantiate(optimizer_constructor::Any; with_bridge_type::Type{Float64}, with_cache_type::Nothing)
+    @ MathOptInterface ~/.julia/packages/MathOptInterface/aJZbq/src/instantiate.jl:175
+  [8] set_optimizer(model::JuMP.Model, optimizer_constructor::Any; add_bridges::Bool)
+    @ JuMP ~/.julia/packages/JuMP/7rBNn/src/optimizer_interface.jl:493
+  [9] #_#1
+    @ ~/.julia/packages/JuMP/7rBNn/src/JuMP.jl:200 [inlined]
+ [10] GenericModel
+    @ ~/.julia/packages/JuMP/7rBNn/src/JuMP.jl:192 [inlined]
+ [11] find_opt(num_node::Int64, num_ins::Int64; timelim::Int64, ins_type::Symbol, returnModel::Bool, save_model::Bool)
+    @ VehicleRoutingSynPre ~/.julia/dev/VehicleRoutingSynPre/src/optimal.jl:175
+ [12] find_opt
+    @ ~/.julia/dev/VehicleRoutingSynPre/src/optimal.jl:49 [inlined]
+ [13] find_opt(ins::String)
+    @ VehicleRoutingSynPre ~/.julia/dev/VehicleRoutingSynPre/src/optimal.jl:24
+ [14] find_opt(::String, ::String, ::String, ::Vararg{String})
+    @ VehicleRoutingSynPre ~/.julia/dev/VehicleRoutingSynPre/src/optimal.jl:17
+ [15] top-level scope
+    @ ~/.julia/dev/VehicleRoutingSynPre/src/script1.jl:12
+in expression starting at /home/payakorn.s/.julia/dev/VehicleRoutingSynPre/src/script1.jl:12
+srun: error: compute1: task 0: Exited with exit code 1

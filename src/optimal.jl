@@ -113,7 +113,8 @@ function find_opt(num_node, num_ins; timelim=10800, ins_type=:txt, returnModel=f
   # num_node = 11
   # num_vehi = 3
   # num_serv = 6
-  M = num_node * 1000
+  # M = num_node * 1000
+  M = 10*maximum(l)
 
   # create set of indices
   N = 1:(num_node)
@@ -170,8 +171,8 @@ function find_opt(num_node, num_ins; timelim=10800, ins_type=:txt, returnModel=f
 
   # model
   # can improve the performance with JuMP (some thing bridge)
-  model = Model(HiGHS.Optimizer)
-  # model = Model(Gurobi.Optimizer)
+  # model = Model(HiGHS.Optimizer)
+  model = Model(Gurobi.Optimizer)
 
   # variables
   # @variable(model, x[i=N, j=N, k=K; i != j], Bin)
