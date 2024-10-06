@@ -46,7 +46,7 @@ end
 # end
 
 
-function find_opt(num_node, num_ins; timelim=10800, ins_type=:txt, returnModel=false, save_model=true)
+function find_opt(num_node, num_ins; timelim=10800, ins_type=:txt, returnModel=false, save_model=true, returnJuMP=false)
 
   ins_name = "ins$num_node-$num_ins"
 
@@ -480,12 +480,49 @@ function find_opt(num_node, num_ins; timelim=10800, ins_type=:txt, returnModel=f
   if save_model
     save_opt_solution_to_YAML(resultDict)
   end
-
+  
   if returnModel
     return get_value_from_opt_result(model), resultDict
+  elseif returnJuMP
+    return model
   else
     return resultDict
   end
+end
+
+function get_results_dict(m::JuMP.Model)
+	av = JuMP.all_variables(m)
+	d = Dict()
+	for v in av
+		# special handling of time series, sub-indices, etc.
+		# e.g. a variable could have three sub-indices in a JuMP.Containers
+		v = string(v) # e.g.  "x[a,2,3]"
+		k = Symbol(v[1:prevind(v, findfirst('[', v))[1]]) # :x
+		if !haskey(d, k)
+			vm = value.(m[k])
+			d[k] = vm.data
+		end
+		#  e.g. typeof(vm) is JuMP.Containers.SparseAxisArray{Float64, 3, Tuple{SubString{String}, Int64, Int64}}
+	end
+	return d
+end
+
+function get_value_x(model::JuMP.Model)
+  df = VehicleRoutingSynPre.get_value_from_opt_result(model)
+  x = df[:x] .|> abs .|> round .|> Int
+
+  # (optional) to convert to dataframe
+  # JuMP.Containers.rowtable(x; header = [:I, :J, :K, :value]) |> DataFrame
+
+  return findall(x -> x == 1, Array(x)) .|> Tuple
+end
+
+function get_value_x_dataframe(model::JuMP.Model)
+  df = VehicleRoutingSynPre.get_value_from_opt_result(model)
+  x = df[:x] .|> abs .|> round .|> Int
+
+  # (optional) to convert to dataframe
+  return JuMP.Containers.rowtable(x; header = [:I, :J, :K, :value]) |> DataFrame
 end
 
 function get_value_from_opt_result(model)
@@ -501,4 +538,90 @@ end
 function load_opt_solution_YAML(ins_name::String)
   location = dir("data", "HHCRSP_opt", "$ins_name.yml")
   return YAML.load_file(location)
+end
+
+function viewgraph(g, edgelabels)
+	@pdf begin
+		background("white")
+		setline(0.5)
+		sethue("black")
+		drawgraph(
+			g,
+			vertexlabels = vertices(g),
+      vertexlabelfontsizes=10,
+			# edgelabels = edgelabels,
+      edgelabels = (k, src, dest, f, t) -> begin
+        @layer begin
+            sethue("black")
+            θ = slope(f, t)
+            Luxor.text(string(edgelabels[(src, dest)]),
+            midpoint(f, t),
+            angle=θ,
+            # halign=:N,
+            # valign=:E
+            )
+        end
+    end,
+    #   edgelabels = (edgenumber, edgesrc, edgedest, from, to) -> begin
+    #   # @layer begin
+    #   #     sethue("white")
+    #   #     box(midpoint(from, to), 35, 15, :fill)
+    #   # end
+    #   # box(midpoint(from, to), 35, 15, :stroke)
+    #   fontsize(12)
+    #   Luxor.text(string(edgelabels[(edgesrc, edgedest)]),
+    #       midpoint(from, to),
+    #       halign=:N,
+    #       valign=:E)
+    # end,
+      edgegaps = 10,
+      edgelabelfontsizes=12,
+      # arrowheadfunction= (f, t, a) -> (),
+      # edgelabelrotations=3,
+      layout = stress,
+      edgecurvature = 2,
+    )
+	end 600 400 "test.pdf"
+end
+
+
+function plot_route(model::JuMP.Model)
+	x = get_value_x(model::JuMP.Model)
+	# sources = [i for (i, j, k) in x]
+	# destina = [j for (i, j, k) in x]
+	# weighted = ones(length(sources))
+	g1 = DiGraph(11)
+  for (i, j, k) in x
+    add_edge!(g1, i, j)
+  end
+	# vehicle1 = [j for (i, j, k) in x if k == 1]
+	# add_vertices!(g1, 11)
+	# for (i, j, k) in x
+	# 	add_edge!(g1, i+1, j+1)
+	# end
+	# test
+	# edges = Dict((i, j) => "v$k" for (i, j, k) in x)
+	edges = Dict()
+  for (i, j, k) in x
+    if haskey(edges, (i, j))
+      edges[(i, j)] *= ",v$k"
+    else
+      edges[(i, j)] = "v$k"
+    end
+  end
+
+	# for (i, j, k, d) in z
+	# 	add_edge!(g1, i + 1, j + 1)
+	# 	edges[(i + 1, j + 1)] = "d$(d)-v$(k)"
+	# end
+	# for (i, j, k, d) in w
+	# 	add_edge!(g1, i + 1, j + 1)
+	# 	edges[(i + 1, j + 1)] = "d$(d)-v$(k)"
+	# end
+
+	# nodefillcolor = [
+	# 	node in vehicle1 ? :blue : :lightgray for node in 1:nv(g1)
+	# ]
+
+	viewgraph(g1, edges)
 end
