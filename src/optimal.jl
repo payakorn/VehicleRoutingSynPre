@@ -553,8 +553,8 @@ function viewgraph(g, edgelabels; gname="test")
 			vertexlabels = vertices(g),
 			vertexlabelfontsizes = 10,
 			vertexshapes = [vtx == 1 ? :square : :circle for vtx in 1:nv(g)],
-			# layout = spring,
-			layout = stress,
+			layout = spring,
+			# layout = stress,
 			# layout = SFDP,
 			# edgelabels = edgelabels,
 			edgelabels = (k, src, dest, f, t) -> begin
