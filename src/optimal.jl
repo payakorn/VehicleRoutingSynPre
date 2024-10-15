@@ -540,20 +540,31 @@ function load_opt_solution_YAML(ins_name::String)
 	return YAML.load_file(location)
 end
 
-function viewgraph(g, edgelabels; gname="test")
+function viewgraph(g, edgelabels; gname="test", layout=nothing)
 	patterns = ["solid", "dotted", "dot", "dotdashed", "longdashed",
 		"shortdashed", "dash", "dashed", "dotdotdashed", "dotdotdotdashed",
 	]
+
+	if isnothing(layout)
+		# pp = spring(adjacency_matrix(g), C=100, seed=1, Ptype=Float32, initialtemp=100)
+		# pps = [Point(pp[i][1], pp[i][2]) for i in 1:length(pp)]
+		pps = spring
+	else
+		pps = layout
+	end
+	# layouts = spring(adjacency_matrix(g))
+	# layout = spring()
 	@pdf begin
 		background("white")
 		setline(0.5)
-		sethue("darkgrey")
+		sethue("black")
+		# sethue("darkgrey")
 		drawgraph(
 			g,
 			vertexlabels = vertices(g),
 			vertexlabelfontsizes = 10,
 			vertexshapes = [vtx == 1 ? :square : :circle for vtx in 1:nv(g)],
-			layout = spring,
+			layout = pps,
 			# layout = stress,
 			# layout = SFDP,
 			# edgelabels = edgelabels,
@@ -662,19 +673,51 @@ function load_edge_route(num_node::Integer, num_ins::Integer, num_run::Integer)
 	return routes
 end
 
-function plot_route(num_node::Integer, num_ins::Integer)
+function plot_route(num_node::Integer, num_ins::Integer; layout=nothing)
 	route = load_edge_route(num_node, num_ins)
 	gname = "Exact-$num_node-$num_ins"
-	plot_route(num_node+1, route, gname=gname)
+	plot_route(num_node+1, route, gname=gname, layout=layout)
 end
 
-function plot_route(num_node::Integer, num_ins::Integer, num_run::Integer)
+function plot_route(num_node::Integer, num_ins::Integer, num_run::Integer; layout=nothing)
 	route = load_edge_route(num_node, num_ins, num_run)
 	gname = "Exact-$num_node-$num_ins-$num_run"
-	plot_route(num_node+1, route, gname=gname)
+	plot_route(num_node+1, route, gname=gname, layout=layout)
 end
 
-function plot_route(num_node::Integer, route::Vector; gname="test")
+function get_graph(model)
+	route = get_value_x(model)
+	num_node = size(VehicleRoutingSynPre.get_value_from_opt_result(model)[:x], 1)
+	g1 = DiGraph(11)
+	for (i, j, k) in route
+		add_edge!(g1, i, j)
+	end
+	# vehicle1 = [j for (i, j, k) in route if k == 1]
+	# add_vertices!(g1, 11)
+	# for (i, j, k) in route
+	# 	add_edge!(g1, i+1, j+1)
+	# end
+	# test
+	# edges = Dict((i, j) => "v$k" for (i, j, k) in route)
+	edges = Dict()
+	for (i, j, k) in route
+		if haskey(edges, (i, j))
+			edges[(i, j)] *= ",v$k"
+		else
+			edges[(i, j)] = "v$k"
+		end
+	end
+	return g1
+end
+
+function get_layout(model::JuMP.Model)
+	g = get_graph(model)
+	pp = spring(adjacency_matrix(g), C=200, seed=1, Ptype=Float32, initialtemp=150)
+	pps = [Point(pp[i][1], pp[i][2]) for i in 1:length(pp)]
+	return pps
+end
+
+function plot_route(num_node::Integer, route::Vector; gname="test", layout=nothing)
 	g1 = DiGraph(num_node)
 	for (i, j, k) in route
 		add_edge!(g1, i, j)
@@ -708,12 +751,17 @@ function plot_route(num_node::Integer, route::Vector; gname="test")
 	# 	node in vehicle1 ? :blue : :lightgray for node in 1:nv(g1)
 	# ]
 	# gname = "$num_node"
-	viewgraph(g1, edges, gname=gname)
+	viewgraph(g1, edges, gname=gname, layout=layout)
 end
 
-function plot_route(model::JuMP.Model)
+function plot_route(model::JuMP.Model; layout=nothing)
 	x = get_value_x(model)
-	plot_route(size(VehicleRoutingSynPre.get_value_from_opt_result(model)[:x], 1), x)
+
+	# pp = spring(adjacency_matrix(g), C=100, seed=1, Ptype=Float32, initialtemp=100)
+	# pps = [Point(pp[i][1], pp[i][2]) for i in 1:length(pp)]
+
+	plot_route(size(VehicleRoutingSynPre.get_value_from_opt_result(model)[:x], 1), x, layout=layout)
+
 	# sources = [i for (i, j, k) in x]
 	# destina = [j for (i, j, k) in x]
 	# weighted = ones(length(sources))
