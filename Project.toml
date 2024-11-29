@@ -14,6 +14,7 @@ Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 Weave = "44d3d7a6-8a23-5bf8-98c5-b353f8df5ec9"
 
 [compat]
+Glob = "1"
 JLD2 = "0.4"
 Latexify = "0.15"
 julia = "1"
